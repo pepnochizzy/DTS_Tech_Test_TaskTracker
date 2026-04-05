@@ -1,0 +1,16 @@
+.gridContainer {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  align-content: start;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.task {
+  padding: 10px;
+  border: 1px solid grey;
+}
+
+.taskRow {
+  display: contents;
+}
