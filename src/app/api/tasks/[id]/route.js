@@ -37,8 +37,23 @@ export async function PATCH(req, { params }) {
     const body = await req.json();
     const fields = [];
     const values = [];
+    //for validation
+    const statusMap = {
+      "not started": "Not started",
+      ongoing: "Ongoing",
+      complete: "Complete",
+    };
 
-    if (body.title) {
+    if (body.title !== undefined) {
+      if (body.title.trim() === "") {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: "Title cannot be empty",
+          }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        );
+      }
       fields.push(`title =$${fields.length + 1}`);
       values.push(body.title);
     }
@@ -53,9 +68,21 @@ export async function PATCH(req, { params }) {
       values.push(body.due);
     }
 
-    if (body.status) {
+    //status validation
+    if (body.status !== undefined) {
+      const normalisedStatus = body.status.toLowerCase().trim();
+
+      if (!statusMap[normalisedStatus]) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: "Invalid status value",
+          }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        );
+      }
       fields.push(`status =$${fields.length + 1}`);
-      values.push(body.status);
+      values.push(statusMap[normalisedStatus]);
     }
 
     if (fields.length === 0) {

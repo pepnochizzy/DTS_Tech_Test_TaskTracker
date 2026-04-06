@@ -27,32 +27,61 @@ export async function GET() {
 
 //create new task
 export async function POST(req) {
+  //for validation
+  const statusMap = {
+    "not started": "Not started",
+    ongoing: "Ongoing",
+    complete: "Complete",
+  };
   try {
     const body = await req.json();
     const { title, due, status, description } = body;
 
-    //validation
-    if (!title || !due || !status) {
+    if (!title || title.trim() === "") {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Title, due and status are required",
+          error: "Title is required and cannot be empty",
         }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        },
+        { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }
 
-    await db.query(
+    const dueDate = new Date(due);
+    if (!due || isNaN(dueDate.getTime())) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Due date is required and must be valid",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    if (!status || !statusMap[status.toLowerCase().trim()]) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: `Status is required and must be one of ${Object.values(statusMap).join(", ")}`,
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    const result = await db.query(
       `INSERT INTO tasktracker (title, status, due, description) VALUES ($1,$2,$3,$4) RETURNING *`,
-      [title, status, due, description || null],
+      [
+        title.trim(),
+        statusMap[status.toLowerCase().trim()],
+        due,
+        description || null,
+      ],
     );
 
     return new Response(
       JSON.stringify({
         success: true,
+        data: result.rows[0],
       }),
       {
         status: 200,
