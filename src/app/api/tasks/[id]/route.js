@@ -11,7 +11,12 @@ export async function GET(req, { params }) {
       id,
     ]);
     const task = result.rows[0];
-
+    if (!task) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Task not found" }),
+        { status: 404, headers: { "Content-Type": "application/json" } },
+      );
+    }
     return new Response(JSON.stringify({ success: true, data: task }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
