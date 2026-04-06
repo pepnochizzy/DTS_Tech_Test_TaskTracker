@@ -1,38 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, use } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { updateTask } from "@/lib/actions/UpdateAction";
+import useTask from "@/hooks/useTask";
 
 export default function EditTask({ params }) {
   const { taskId } = use(params);
   const router = useRouter();
-  const [error, setError] = useState(null);
-  const [task, setTask] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [pending, setPending] = useState(false);
 
-  useEffect(() => {
-    async function fetchTask() {
-      try {
-        const res = await fetch(`/api/tasks/${taskId}`);
-        const data = await res.json();
-        if (!res.ok) {
-          setError(data.error);
-        } else {
-          if (data.data.description === "NULL") {
-            data.data.description = "No details given - not required";
-          }
-          setTask(data.data);
-        }
-      } catch (err) {
-        setError("Failed to fetch task");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchTask();
-  }, [taskId]);
+  const { task, loading, error } = useTask(taskId);
+  const displayDescription =
+    task?.description === "NULL"
+      ? "No details given - not required"
+      : task?.description;
 
   //Form submit
   async function handleUpdates(event) {
@@ -47,22 +30,11 @@ export default function EditTask({ params }) {
     };
 
     try {
-      const res = await fetch(`/api/tasks/${taskId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        console.error("Failed to update task:", data.error);
-        alert(`Error: ${data.error}`);
-        setPending(false);
-        return;
-      }
+      await updateTask(taskId, body);
       router.push("/");
     } catch (err) {
-      alert("Failed to update task");
+      alert(`Error: ${err.message}`);
+    } finally {
       setPending(false);
     }
   }
@@ -108,7 +80,7 @@ export default function EditTask({ params }) {
           type="text"
           name="description"
           maxLength={255}
-          defaultValue={task.description}
+          defaultValue={displayDescription}
           placeholder="optional"
           className="text-gray-600 border-b border-gray-500 pl-4"
         />

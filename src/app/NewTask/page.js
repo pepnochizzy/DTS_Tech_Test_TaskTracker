@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { createTask } from "@/lib/actions/CreateAction";
 
 export default function NewTask() {
   const [pending, setPending] = useState(false);
   const router = useRouter();
+  //form submit
   async function handleTaskData(event) {
     event.preventDefault();
     setPending(true);
@@ -14,33 +16,21 @@ export default function NewTask() {
     const formData = new FormData(event.target);
     const body = {
       title: formData.get("title"),
-      description: formData.get("description"),
       status: formData.get("status"),
+      description: formData.get("description"),
       due: formData.get("due"),
     };
-
     try {
-      const res = await fetch("/api/tasks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        console.error("Failed to create task:", data.error);
-        alert(`Error: ${data.error}`);
-        setPending(false);
-        return;
-      }
-
+      await createTask(body);
+      setPending(false);
       router.push("/");
     } catch (err) {
-      console.error("Error calling API:", err);
-      alert("Failed to create task.");
+      alert(`Error: ${err.message}`);
+    } finally {
       setPending(false);
     }
   }
+
   return (
     <main className="items-center self-center justify-center">
       <Link

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
+import { updateTask } from "@/lib/actions/UpdateAction";
 import { Pencil } from "lucide-react";
 
 export default function StatusEditable({ task, id, refresh }) {
@@ -10,31 +10,15 @@ export default function StatusEditable({ task, id, refresh }) {
 
   async function handleUpdates(event) {
     event.preventDefault();
-    setPending(true);
-    setOpen(false);
     const formData = new FormData(event.target);
-    const body = {
-      status: formData.get("status"),
-    };
-
+    const body = { status: formData.get("status") };
+    setPending(true);
     try {
-      const res = await fetch(`/api/tasks/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        console.error("Failed to update status:", data.error);
-        alert(`Error: ${data.error}`);
-        setPending(false);
-        return;
-      }
-      setPending(false);
-      await refresh();
+      await updateTask(id, body, refresh);
+      setOpen(false);
     } catch (err) {
-      alert("Failed to update status");
+      alert(`Error: ${err.message}`);
+    } finally {
       setPending(false);
     }
   }

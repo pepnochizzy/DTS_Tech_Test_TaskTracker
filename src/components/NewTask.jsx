@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { createTask } from "@/hooks/useTasks";
 
 export default function NewTask() {
   const [pending, setPending] = useState(false);
   const router = useRouter();
+
   //form submit
   async function handleTaskData(event) {
     event.preventDefault();
@@ -18,24 +20,13 @@ export default function NewTask() {
       description: formData.get("description"),
       due: formData.get("due"),
     };
-
     try {
-      const res = await fetch(`/api/tasks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        console.error("Failed to create new task:", data.error);
-        alert(`Error: ${data.error}`);
-        setPending(false);
-        return;
-      }
+      await createTask(body);
+      setPending(false);
       router.push("/");
     } catch (err) {
-      alert("Failed to update task");
+      alert(`Error: ${err.message}`);
+    } finally {
       setPending(false);
     }
   }

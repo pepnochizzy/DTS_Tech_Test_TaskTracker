@@ -5,32 +5,10 @@ import DeleteTask from "@/components/DeleteTask";
 import StatusEditable from "@/components/StatusEditable";
 import style from "@/styles/homePage.module.css";
 import DetailsDropdown from "@/components/DetailsDropdown";
-import { useEffect, useState } from "react";
+import { useTasks } from "@/hooks/useTasks";
 
 export default function TaskTrack() {
-  const [task, setTask] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  async function fetchTask() {
-    try {
-      const res = await fetch(`/api/tasks`);
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error);
-      } else {
-        setTask(data.data);
-      }
-    } catch (err) {
-      setError("Failed to fetch task");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchTask();
-  }, []);
+  const { tasks, loading, error, refresh } = useTasks();
 
   if (loading) return <p>Loading task...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -39,7 +17,7 @@ export default function TaskTrack() {
     <main className="items-center self-center justify-center">
       <h1 className="font-bold text-2xl mt-10 mb-4">Current Tasks</h1>
       <div className={style.gridContainer}>
-        {task.map((task) => (
+        {tasks.map((task) => (
           <section key={task.id} className={style.taskRow}>
             <div className={style.task}>
               <h2>{task.title}</h2>
@@ -49,7 +27,7 @@ export default function TaskTrack() {
               <StatusEditable
                 task={task.status}
                 id={task.id}
-                refresh={fetchTask}
+                refresh={refresh}
               />
             </div>
             <div className={style.task}>
@@ -70,13 +48,13 @@ export default function TaskTrack() {
               >
                 Edit task
               </Link>
-              <DeleteTask id={task.id} refresh={fetchTask} />
+              <DeleteTask id={task.id} refresh={refresh} />
               {/* <Trash2 aria-label="Delete" /> */}
             </div>
           </section>
         ))}
       </div>
-      {!task && <p>No tasks to display</p>}
+      {!tasks || tasks.length === 0 ? <p>No tasks to display</p> : null}
       <div className="mt-5">
         <Link
           href={"/NewTask"}
