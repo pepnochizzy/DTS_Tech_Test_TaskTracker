@@ -38,7 +38,7 @@ npm install
 ```
 
 3. Create new .env file and configure database credentials
-4. Optionally, try it out live with [this link](#https://task-tracker-snowy-two.vercel.app/)
+4. Optionally, try it out live with [this link](https://task-tracker-snowy-two.vercel.app/)
 
 ## API endpoints
 
