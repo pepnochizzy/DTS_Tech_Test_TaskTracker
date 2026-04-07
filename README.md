@@ -1,6 +1,6 @@
 # Task Tracker
 
-An application created with Next.Js to track tasks
+An application created with Next.Js to track tasks created in the style of a Gov site (this application has no affiliation with Gov.uk)
 
 ## Table of contents
 
