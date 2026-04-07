@@ -65,6 +65,10 @@ export default function TaskTrack() {
           Create a new task
         </Link>
       </div>
+      <p className="mt-4">
+        This site is for demonstration purposes only and has no affiliation with
+        any official sites
+      </p>
     </main>
   );
 }
